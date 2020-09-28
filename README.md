@@ -1,6 +1,15 @@
 # highlighter
 
+Easy to use PEP 508 markers.
 
+```py
+from packaging.markers import Marker
+from highlighter import EnvironmentMarkers
+
+env = EnvironmentMarkers.for_python("3.7.5", "win32")
+m = Marker("python_version < '3.7'")
+print("Match?", env.match(m))
+```
 
 # License
 
