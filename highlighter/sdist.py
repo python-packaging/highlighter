@@ -1,3 +1,5 @@
+import sys
+from pathlib import Path
 from typing import List
 
 
@@ -29,3 +31,8 @@ def convert_sdist_requires(data: str) -> List[str]:
             else:
                 lst.append(line)
     return lst
+
+
+if __name__ == "__main__":  # pragma: no cover
+    for line in convert_sdist_requires(Path(sys.argv[1]).read_text()):
+        print(line)
