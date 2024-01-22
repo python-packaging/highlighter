@@ -2,7 +2,7 @@ import unittest
 
 from packaging.markers import Marker
 
-from ..types import EnvironmentMarkers, Extras
+from ..types import EnvironmentMarkers
 
 
 class EnvironmentMarkersTest(unittest.TestCase):
@@ -31,6 +31,13 @@ class EnvironmentMarkersTest(unittest.TestCase):
         e = EnvironmentMarkers.for_python("3.7.5")
         self.assertFalse(e.match(m))
 
+    def test_no_extras(self) -> None:
+        m = Marker("extra == ''")
+        e = EnvironmentMarkers.for_python("3.7.5")
+        self.assertTrue(e.match(m))
+        self.assertTrue(e.match(m, ()))
+        self.assertFalse(e.match(m, ("foo",)))
+
     def test_extras(self) -> None:
         m = Marker("extra == 'foo'")
         e = EnvironmentMarkers.for_python("3.7.5")
@@ -39,21 +46,3 @@ class EnvironmentMarkersTest(unittest.TestCase):
         self.assertTrue(e.match(m, ("a", "foo")))
         self.assertTrue(e.match(m, ("foo", "a")))
         self.assertFalse(e.match(m, ("food",)))
-
-
-class ExtrasTest(unittest.TestCase):
-    def test_extras_cls(self) -> None:
-        e = Extras(("a",))
-        self.assertEqual(e, "a")
-        self.assertNotEqual(e, "b")
-
-    def test_extas_cls2(self) -> None:
-        e = Extras(("a", "b",))
-        self.assertEqual(e, "a")
-        self.assertEqual(e, "b")
-        self.assertNotEqual(e, "c")
-
-    def test_extras_nonstr(self) -> None:
-        e = Extras(("a",))
-        self.assertNotEqual(e, 1)
-        self.assertNotEqual(e, 1.1)

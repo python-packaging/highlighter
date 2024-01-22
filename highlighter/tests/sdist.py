@@ -6,7 +6,8 @@ from ..sdist import convert_sdist_requires
 class ConvertSdistRequiresTest(unittest.TestCase):
     def test_blank_line(self) -> None:
         self.assertEqual(
-            ["a"], convert_sdist_requires("a\n\n"),
+            ["a"],
+            convert_sdist_requires("a\n\n"),
         )
 
     def test_section(self) -> None:

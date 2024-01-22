@@ -1,5 +1,5 @@
 from dataclasses import asdict, dataclass
-from typing import Iterable, Optional, Sequence
+from typing import Optional, Sequence
 
 from packaging.markers import Marker
 
@@ -31,27 +31,23 @@ class EnvironmentMarkers:
             raise TypeError(f"Unknown sys_platform: {self.sys_platform!r}")
 
     @classmethod
-    def for_python(cls, version: str, platform: str = "linux",) -> "EnvironmentMarkers":
+    def for_python(
+        cls,
+        version: str,
+        platform: str = "linux",
+    ) -> "EnvironmentMarkers":
         assert platform in (None, "linux", "win32", "darwin")
         assert version.count(".") == 2
         t = ".".join(version.split(".")[:2])
         return cls(sys_platform=platform, python_version=t, python_full_version=version)
 
     def match(self, marker: Marker, extras: Sequence[str] = ()) -> bool:
-        env = dict(**asdict(self), extra=Extras(extras))
-        return bool(marker.evaluate(env))
+        env = asdict(self)
+        # This logic was discovered by looking at
+        # pip/_internal/req/req_install.py but doesn't seem to be documented
+        # anywhere.  We used to be able to use a class as the env value to make
+        # "==" work as "in".
+        if not extras:
+            extras = ("",)
 
-
-class Extras:
-    """
-    This is a tiny class that lets us get 'extra == "foo"' working for
-    `packaging.markers`
-    """
-
-    def __init__(self, extras: Iterable[str]) -> None:
-        self.extras = extras
-
-    def __eq__(self, other: object) -> bool:
-        if not isinstance(other, str):
-            return False
-        return other in self.extras
+        return any(marker.evaluate({**env, "extra": extra}) for extra in extras)
